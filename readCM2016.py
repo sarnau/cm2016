@@ -4,7 +4,7 @@
 import struct
 import serial
 
-SERIAL = "/dev/cu.SLAB_USBtoUART"
+SERIAL = "/dev/ttyUSB0"
  
 # Open serial device for reading, it is 19200 baud, 8N1
 ser = serial.Serial(SERIAL, 19200)
@@ -68,17 +68,17 @@ while True:
 
     # each packet starts with 7 bytes, which are the name of the device
     header = ser.read(7)
-    if header != 'CM2016 ': # Charge Master 2016 detected?
+    if header.decode() != 'CM2016 ': # Charge Master 2016 detected?
         continue
 
     # the next 10 bytes are global data for all slots or the device
     header = ser.read(10)
-    print 'VERSION=%d.%d CHEM=%s OVERTEMP_FLAG=%d TEMP_START=%d TEMP_ACT=%d ACTION_CNTR=%d' % ( ord(header[0]),ord(header[1]),CHEM[ord(header[2])],ord(header[3]),struct.unpack(">h", header[4:6])[0],struct.unpack(">h", header[6:8])[0],struct.unpack(">h", header[8:10])[0])
+    print('VERSION=%d.%d CHEM=%s OVERTEMP_FLAG=%d TEMP_START=%d TEMP_ACT=%d ACTION_CNTR=%d' % ( header[0],header[1],CHEM[header[2]],header[3],struct.unpack(">h", header[4:6])[0],struct.unpack(">h", header[6:8])[0],struct.unpack(">h", header[8:10])[0]))
 
     # the CM2016 has 6 slots, each is 18 bytes of data
     for slot in range(1,7):
         slotData = ser.read(18)
-        print 'Slot S%s : %s/%s/%s/?%d? Time=%s Voltage=%.3fV Current=%.3fA CCAP=%.3fmAh DCAP=%.3fmAh' % (slotStr(slot),ACTIVE[ord(slotData[0])],PROGRAM[ord(slotData[1])],MODES[ord(slotData[2])],ord(slotData[3]),timeStr(struct.unpack("<h", slotData[4:6])[0]),struct.unpack("<h", slotData[6:8])[0] / 1000.0,struct.unpack("<h", slotData[8:10])[0] / 1000.0,struct.unpack("<i", slotData[10:14])[0] / 100.0,struct.unpack("<i", slotData[14:18])[0] / 100.0)
+        print('Slot S%s : %s/%s/%s/?%d? Time=%s Voltage=%.3fV Current=%.3fA CCAP=%.3fmAh DCAP=%.3fmAh' % (slotStr(slot),ACTIVE[slotData[0]],PROGRAM[slotData[1]],MODES[slotData[2]],slotData[3],timeStr(struct.unpack("<h", slotData[4:6])[0]),struct.unpack("<h", slotData[6:8])[0] / 1000.0,struct.unpack("<h", slotData[8:10])[0] / 1000.0,struct.unpack("<i", slotData[10:14])[0] / 100.0,struct.unpack("<i", slotData[14:18])[0] / 100.0))
 
     # and a 16 byte CRC follows
     crc = ser.read(2)
