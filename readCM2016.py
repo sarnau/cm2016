@@ -74,8 +74,7 @@ f = [open('CM2016_log_S' +
      for i in range(6)]
 for file in f:
     file.write(
-        'Time, Chemistry, Status, Program, Mode, UNKNOWN, Voltage= / V, Current / A, CCAP / mAh, DCAP / mAh\n')
-
+        'Slot, Timestamp (ISO 8601), Program Time, Chemistry, Status, Program, Mode, ???, Voltage= / V, Current / A, CCAP / mAh, DCAP / mAh\n')
 
 values = [[]]*6
 old_values = [[]]*6
@@ -112,8 +111,8 @@ while True:
         print('Slot S%s : Time=%s %s/%s/%s/?%d? Voltage=%.3fV Current=%.3fA CCAP=%.3fmAh DCAP=%.3fmAh' %
               tuple([slotStr(slot+1), valtime]+values[slot]))
         if values[slot] != old_values[slot]:
-            f[slot].write('%s, %s, %s, %s, %s, %d, %.3f, %.3f, %.3f, %.3f\n' %
-                          tuple([valtime,CHEM[header[2]]]+values[slot]))
+            f[slot].write('S%s, %s, %s, %s, %s, %s, %s, %d, %.3f, %.3f, %.3f, %.3f\n' %
+                          tuple([slotStr(slot+1), datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), valtime, CHEM[header[2]]]+values[slot]))
             f[slot].flush()
             old_values[slot] = values[slot]
 
