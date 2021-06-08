@@ -4,8 +4,10 @@
 import struct
 import serial
 from datetime import datetime
+from statistics import median
 
 SERIAL = "/dev/ttyUSB0"
+window_size = 60 # window soze for median calculation
 
 # Open serial device for reading, it is 19200 baud, 8N1
 ser = serial.Serial(SERIAL, 19200)
@@ -74,15 +76,13 @@ f = [open('CM2016_log_S' +
      for i in range(6)]
 for file in f:
     file.write(
-<<<<<<< HEAD
         'Slot, Timestamp (ISO 8601), Program Time, Chemistry, Status, Program, Mode, ???, Voltage= / V, Current / A, CCAP / mAh, DCAP / mAh\n')
-=======
-        'Timestamp (ISO 8601), Program Time, Chemistry, Status, Program, Mode, ???, Voltage= / V, Current / A, CCAP / mAh, DCAP / mAh\n')
->>>>>>> 25a7880678cad57271ed31e706018499d22deeca
 
 
 values = [[]]*6
 old_values = [[]]*6
+median_probes = [[[], [], [], []], [[], [], [], []], [[], [], [], []], [
+    [], [], [], []], [[], [], [], []], [[], [], [], []]]
 
 while True:
     # make sure that are no old bytes left in the input buffer
@@ -104,25 +104,27 @@ while True:
     for slot in range(6):
         slotData = ser.read(18)
         valtime = timeStr(struct.unpack("<h", slotData[4:6])[0])
-        values[slot] = [ACTIVE[slotData[0]],
+        direct_vals = [ACTIVE[slotData[0]],
                         PROGRAM[slotData[1]],
                         MODES[slotData[2]],
-                        slotData[3],
-                        struct.unpack("<h", slotData[6:8])[0] / 1000.0,
-                        struct.unpack("<h", slotData[8:10])[0] / 1000.0,
-                        struct.unpack("<i", slotData[10:14])[0] / 100.0,
-                        struct.unpack("<i", slotData[14:18])[0] / 100.0]
+                        slotData[3]]
+        curr_vals_for_median = [struct.unpack("<h", slotData[6:8])[0] / 1000.0,
+                     struct.unpack("<h", slotData[8:10])[0] / 1000.0,
+                     struct.unpack("<i", slotData[10:14])[0] / 100.0,
+                     struct.unpack("<i", slotData[14:18])[0] / 100.0]
 
-        print('Slot S%s : Time=%s %s/%s/%s/?%d? Voltage=%.3fV Current=%.3fA CCAP=%.3fmAh DCAP=%.3fmAh' %
-              tuple([slotStr(slot+1), valtime]+values[slot]))
+        [a.append(b) for a, b in zip(median_probes[slot], curr_vals_for_median)]
+        [a.pop(0) for a in median_probes[slot] if len(a) > window_size]
+        median_vals = [round(median(a),3) for a in median_probes[slot]]
+
+        print('Slot S%s : Time=%s %s/%s/%s/?%d? ' % tuple([slotStr(slot+1), valtime]+direct_vals),end='')
+        print('Voltage=%.3fV Current=%.3fA CCAP=%.3fmAh DCAP=%.3fmAh ' % tuple(curr_vals_for_median))
+
+        values[slot] = direct_vals + median_vals
+
         if values[slot] != old_values[slot]:
-<<<<<<< HEAD
             f[slot].write('S%s, %s, %s, %s, %s, %s, %s, %d, %.3f, %.3f, %.3f, %.3f\n' %
                           tuple([slotStr(slot+1), datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), valtime, CHEM[header[2]]]+values[slot]))
-=======
-            f[slot].write('%s, %s, %s, %s, %s, %s, %d, %.3f, %.3f, %.3f, %.3f\n' %
-                          tuple([datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), valtime, CHEM[header[2]]]+values[slot]))
->>>>>>> 25a7880678cad57271ed31e706018499d22deeca
             f[slot].flush()
             old_values[slot] = values[slot]
 
