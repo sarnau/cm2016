@@ -77,7 +77,10 @@ f = [open('CM2016_log_S' +
 for file in f:
     file.write(
         'Slot, Timestamp (ISO 8601), Program Time, Chemistry, Status, Program, Mode, ???, Voltage= / V, Current / A, CCAP / mAh, DCAP / mAh\n')
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0f1dfdf79f3c058a13e5e43afb6929da55c6fa6f
 
 values = [[]]*6
 old_values = [[]]*6
