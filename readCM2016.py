@@ -7,7 +7,7 @@ from datetime import datetime
 from statistics import median
 
 SERIAL = "/dev/ttyUSB0"
-window_size = 60 # window soze for median calculation
+window_size = 60 # window size for median calculation
 
 # Open serial device for reading, it is 19200 baud, 8N1
 ser = serial.Serial(SERIAL, 19200)
