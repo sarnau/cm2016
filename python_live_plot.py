@@ -26,7 +26,7 @@ def animate(i):
     ax1.set_ylabel('U / V', color=color1)
     ax1.tick_params(axis='y', labelcolor=color1)
     plt.gcf().canvas.manager.set_window_title(slot[-1]);
-    plt.gcf().suptitle("Mode:"+data['Mode'].values[-1]);
+    plt.gcf().suptitle("Chemistry: "+data['Chemistry'].values[-1]+"; Program: "+data['Program'].values[-1]+"; Status: "+data['Status'].values[-1]+"; Mode: "+data['Mode'].values[-1]);
     
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax2.set_ylabel('I / A', color=color2)  # we already handled the x-label with ax1
