@@ -51,8 +51,6 @@ MODES = {
 }
 
 # convert minutes into an hour:minutes string
-
-
 def timeStr(minutes):
     return '%2.2d:%-2.2d' % (minutes / 60, minutes % 60)
 
@@ -68,15 +66,7 @@ def slotStr(slot):
         return str(slot)
 
 
-f = [open('CM2016_log_S' +
-          slotStr(i+1) +
-          '_' +
-          datetime.now().strftime('%Y-%m-%dT%H%M%S') +
-          '.csv', 'w')
-     for i in range(6)]
-for file in f:
-    file.write(
-        'Slot, Timestamp (ISO 8601), Program Time, Chemistry, Status, Program, Mode, ???, Voltage= / V, Current / A, CCAP / mAh, DCAP / mAh\n')
+f = [[],[],[],[],[],[]]
 
 values = [[]]*6
 old_values = [[]]*6
@@ -122,11 +112,21 @@ while True:
         values[slot] = direct_vals + median_vals
 
         if values[slot] != old_values[slot]:
-            f[slot].write('S%s, %s, %s, %s, %s, %s, %s, %d, %.3f, %.3f, %.3f, %.3f\n' %
+            if values[slot][0] == "Empty" and values[slot][1] == "Idle" and values[slot][2] == "---":
+                if f[slot]:
+                    f[slot].flush()
+                    f[slot].close
+                    f[slot] = []
+            else:
+                if not f[slot]:
+                    f[slot] = open('CM2016_log_S' + slotStr(slot+1) + '_' + datetime.now().strftime('%Y-%m-%dT%H%M%S') + '.csv', 'w')
+                    f[slot].write('Slot,Timestamp (ISO 8601),Program Time,Chemistry,Status,Program,Mode,???,Voltage / V,Current / A,CCAP / mAh,DCAP / mAh\n')
+                f[slot].write('S%s,%s,%s,%s,%s,%s,%s,%d,%.3f,%.3f,%.3f,%.3f\n' %
                           tuple([slotStr(slot+1), datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), valtime, CHEM[header[2]]]+values[slot]))
-            f[slot].flush()
-            old_values[slot] = values[slot]
+                f[slot].flush()
+                old_values[slot] = values[slot]
 
+                    
     # and a 16 byte CRC follows
     crc = ser.read(2)
     # the way the CRC16 is calculated is unknown to me, it either is a very uncommon one or it is initialized in a different way. The Visual Basic software from Conrad doesn't check for it, it only tests the header
