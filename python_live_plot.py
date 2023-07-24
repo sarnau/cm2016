@@ -14,7 +14,7 @@ def animate(i):
     data = pd.read_csv(sys.argv[1], parse_dates=['Timestamp (ISO 8601)'])
     t = data['Timestamp (ISO 8601)'].values
     U = data['Voltage / V'].values
-    I = data['Current / A'].values
+    I = [i if m=="Charge" else -i for (m,i) in zip(data['Mode'].values,data['Current / A'].values)]
     CCAP = data['CCAP / mAh'].values
     DCAP = data['DCAP / mAh'].values
     CAP = [c if m=="Charge" else c-d for (m, c, d) in zip(data['Mode'].values,data['CCAP / mAh'].values,data['DCAP / mAh'].values)]
@@ -29,7 +29,7 @@ def animate(i):
     plt.gcf().suptitle("Chemistry: "+data['Chemistry'].values[-1]+"; Program: "+data['Program'].values[-1]+"; Status: "+data['Status'].values[-1]+"; Mode: "+data['Mode'].values[-1]);
     
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    ax2.set_ylabel('I / A', color=color2)  # we already handled the x-label with ax1
+    ax2.set_ylabel('I / A', color=color2)
     ax2.plot(t, I, color=color2)
     ax2.tick_params(axis='y', labelcolor=color2)
 
