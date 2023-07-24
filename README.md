@@ -8,4 +8,7 @@ The script logs the running median of each value into seperate files for every s
 
 Only one byte in the slot header is unknown (it seems the Windows software is also not using it) and the device header has a few semi-unknown ones (the version, the temperature, etc) – only the chemical setting is actually used by the Window software.
 
-Also, there is a live plot tool as in the original software. Just start it with the filename of a csv as a command line parameter to plot Voltage, Current and Charging / Discharging Capacity, updating live. If mode is "Charging", it shows the absolute charging capacity, if mode is "Discharging", it shows "(last) CCAP - DCAP". Needs `pip install pandas` and `pip install matplotlib`.
+Also, there is a live plot tool as in the original software. Just start it with the filename of a csv as a command line parameter to plot Voltage, Current and Charging / Discharging Capacity, updating live. If mode is "Charging", it shows the absolute charging capacity, if mode is "Discharging", it shows "(last) CCAP - DCAP". Discharging current is shown negative. Needs `pip install pandas` and `pip install matplotlib`.  
+
+Screenshot:  
+![screenshot of plot](screenshot_plot.png?raw=true "Screenshot of plot")
